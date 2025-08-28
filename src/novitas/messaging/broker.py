@@ -218,9 +218,10 @@ class RedisMessageBroker(MessageBroker):
 
         # Subscribe to agent's channel
         if self._pubsub:
-            asyncio.create_task(
-                self._pubsub.subscribe(f"agent:{agent_id}")
-            )
+            # Store task reference to avoid RUF006 warning
+            task = asyncio.create_task(self._pubsub.subscribe(f"agent:{agent_id}"))
+            # We don't need to await this task, so we ignore it
+            _ = task
 
         logger.info(f"Agent {agent_id} subscribed to messages")
 
@@ -244,9 +245,12 @@ class RedisMessageBroker(MessageBroker):
 
                 # Unsubscribe from agent's channel
                 if self._pubsub:
-                    asyncio.create_task(
+                    # Store task reference to avoid RUF006 warning
+                    task = asyncio.create_task(
                         self._pubsub.unsubscribe(f"agent:{agent_id}")
                     )
+                    # We don't need to await this task, so we ignore it
+                    _ = task
 
         logger.info(f"Agent {agent_id} unsubscribed from messages")
 

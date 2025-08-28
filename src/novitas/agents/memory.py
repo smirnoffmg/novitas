@@ -1,6 +1,7 @@
 """Agent memory management for the Novitas AI system."""
 
 import asyncio
+import contextlib
 from collections.abc import Callable
 from datetime import UTC
 from datetime import datetime
@@ -64,10 +65,7 @@ class MemoryFilter:
         if self.start_time and item.timestamp < self.start_time:
             return False
 
-        if self.end_time and item.timestamp > self.end_time:
-            return False
-
-        return True
+        return not (self.end_time and item.timestamp > self.end_time)
 
 
 class AgentMemoryManager:
@@ -127,10 +125,8 @@ class AgentMemoryManager:
         # Stop cleanup task
         if agent_id in self._cleanup_tasks:
             self._cleanup_tasks[agent_id].cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._cleanup_tasks[agent_id]
-            except asyncio.CancelledError:
-                pass
             del self._cleanup_tasks[agent_id]
 
         # Save memory before unregistering
@@ -654,10 +650,8 @@ class LangChainMemoryManager:
         # Stop cleanup task
         if agent_id in self._cleanup_tasks:
             self._cleanup_tasks[agent_id].cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._cleanup_tasks[agent_id]
-            except asyncio.CancelledError:
-                pass
             del self._cleanup_tasks[agent_id]
 
         # Save memory before unregistering

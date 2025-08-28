@@ -157,11 +157,9 @@ class TestDatabaseManager:
     async def test_migrate_database(self, clean_database) -> None:
         """Test database migration."""
         # Arrange
-        manager = clean_database
 
         # Act & Assert - Should not raise an exception
         # Skip migration test for now as it requires PostgreSQL setup
-        # await manager.migrate()
         pass
 
     @pytest.mark.asyncio

@@ -1,6 +1,5 @@
 """Tests for Agent Factory."""
 
-from unittest.mock import AsyncMock
 from unittest.mock import Mock
 from unittest.mock import patch
 from uuid import UUID
@@ -9,9 +8,8 @@ import pytest
 
 from novitas.agents.agent_factory import AgentFactory
 from novitas.agents.agent_factory import DefaultAgentFactory
-from novitas.agents.code_agent import CodeAgent
+from novitas.agents.orchestrator import OrchestratorAgent
 from novitas.core.exceptions import AgentError
-from novitas.core.models import AgentType
 from novitas.core.protocols import DatabaseManager
 from novitas.core.protocols import MessageBroker
 
@@ -44,8 +42,8 @@ class TestAgentFactory:
         assert factory.available_llm_providers == available_providers
 
     @pytest.mark.asyncio
-    async def test_create_code_agent(self):
-        """Test creating a code agent."""
+    async def test_create_orchestrator_agent(self):
+        """Test creating an orchestrator agent."""
         mock_db = Mock(spec=DatabaseManager)
         mock_broker = Mock(spec=MessageBroker)
         available_providers = {
@@ -64,18 +62,17 @@ class TestAgentFactory:
                 "novitas.agents.agent_factory.generate_structured_response"
             ) as mock_generate_response,
         ):
-
             # Mock the LLM provider
             mock_provider = Mock()
             mock_create_provider.return_value = mock_provider
 
             # Mock the structured response
             mock_response = Mock()
-            mock_response.prompt = "Test prompt for code agent"
+            mock_response.prompt = "Test prompt for orchestrator agent"
             mock_generate_response.return_value = mock_response
 
             # Mock agent initialization
-            with patch.object(CodeAgent, "initialize") as mock_init:
+            with patch.object(OrchestratorAgent, "initialize") as mock_init:
                 mock_init.return_value = None
 
                 factory = DefaultAgentFactory(
@@ -85,37 +82,14 @@ class TestAgentFactory:
                 )
 
                 agent = await factory.create_agent(
-                    agent_type="code_agent",
-                    name="Test Code Agent",
-                    description="A test code agent",
-                    capabilities=["code_analysis", "refactoring"],
+                    name="Test Orchestrator Agent",
+                    description="A test orchestrator agent",
+                    capabilities=["coordination", "task_assignment"],
                 )
 
-                assert agent.name == "Test Code Agent"
-                assert agent.description == "A test code agent"
-                assert agent.agent_type == AgentType.CODE_AGENT.value
+                assert agent.name == "Test Orchestrator Agent"
+                assert agent.description == "A test orchestrator agent"
                 assert agent.id is not None
-
-    @pytest.mark.asyncio
-    async def test_create_agent_invalid_type(self):
-        """Test creating an agent with invalid type raises error."""
-        mock_db = Mock(spec=DatabaseManager)
-        mock_broker = Mock(spec=MessageBroker)
-        available_providers = {"anthropic": {"api_key": "test"}}
-
-        factory = DefaultAgentFactory(
-            database_manager=mock_db,
-            message_broker=mock_broker,
-            available_llm_providers=available_providers,
-        )
-
-        with pytest.raises(AgentError, match="Unknown agent type"):
-            await factory.create_agent(
-                agent_type="invalid_agent",
-                name="Test Agent",
-                description="A test agent",
-                capabilities=["test"],
-            )
 
     @pytest.mark.asyncio
     async def test_create_agent_no_providers(self):
@@ -132,7 +106,6 @@ class TestAgentFactory:
 
         with pytest.raises(AgentError, match="No LLM providers available"):
             await factory.create_agent(
-                agent_type="code_agent",
                 name="Test Agent",
                 description="A test agent",
                 capabilities=["test"],
@@ -153,8 +126,59 @@ class TestAgentFactory:
             patch(
                 "novitas.agents.agent_factory.generate_structured_response"
             ) as mock_generate_response,
+            patch.object(OrchestratorAgent, "initialize") as mock_init,
+            patch.object(OrchestratorAgent, "cleanup") as mock_cleanup,
         ):
+            # Mock the LLM provider
+            mock_provider = Mock()
+            mock_create_provider.return_value = mock_provider
 
+            # Mock the structured response
+            mock_response = Mock()
+            mock_response.prompt = "Test prompt for code agent"
+            mock_generate_response.return_value = mock_response
+
+            # Mock agent initialization and cleanup
+            mock_init.return_value = None
+            mock_cleanup.return_value = None
+
+            factory = DefaultAgentFactory(
+                database_manager=mock_db,
+                message_broker=mock_broker,
+                available_llm_providers=available_providers,
+            )
+
+            # Create an agent first
+            agent = await factory.create_agent(
+                name="Test Agent",
+                description="A test agent",
+                capabilities=["test"],
+            )
+
+            # Retire the agent
+            await factory.retire_agent(agent.id, "Test retirement")
+
+            # Verify the agent is no longer in active agents
+            active_agents = await factory.get_active_agents()
+            assert agent.id not in [a.id for a in active_agents]
+
+    @pytest.mark.asyncio
+    async def test_get_active_agents(self):
+        """Test getting active agents."""
+        mock_db = Mock(spec=DatabaseManager)
+        mock_broker = Mock(spec=MessageBroker)
+        available_providers = {"anthropic": {"api_key": "test"}}
+
+        # Mock the LLM provider creation and structured response
+        with (
+            patch(
+                "novitas.agents.agent_factory.create_llm_provider"
+            ) as mock_create_provider,
+            patch(
+                "novitas.agents.agent_factory.generate_structured_response"
+            ) as mock_generate_response,
+            patch.object(OrchestratorAgent, "initialize") as mock_init,
+        ):
             # Mock the LLM provider
             mock_provider = Mock()
             mock_create_provider.return_value = mock_provider
@@ -165,62 +189,31 @@ class TestAgentFactory:
             mock_generate_response.return_value = mock_response
 
             # Mock agent initialization
-            with patch.object(CodeAgent, "initialize") as mock_init:
-                mock_init.return_value = None
+            mock_init.return_value = None
 
-                factory = DefaultAgentFactory(
-                    database_manager=mock_db,
-                    message_broker=mock_broker,
-                    available_llm_providers=available_providers,
-                )
+            factory = DefaultAgentFactory(
+                database_manager=mock_db,
+                message_broker=mock_broker,
+                available_llm_providers=available_providers,
+            )
 
-                # Create an agent first
-                agent = await factory.create_agent(
-                    agent_type="code_agent",
-                    name="Test Agent",
-                    description="A test agent",
-                    capabilities=["test"],
-                )
+            # Create multiple agents
+            agent1 = await factory.create_agent(
+                name="Agent 1",
+                description="First agent",
+                capabilities=["test"],
+            )
 
-                # Retire the agent
-                await factory.retire_agent(agent.id, "Test retirement")
+            agent2 = await factory.create_agent(
+                name="Agent 2",
+                description="Second agent",
+                capabilities=["test"],
+            )
 
-                # Verify the agent is no longer in active agents
-                active_agents = await factory.get_active_agents()
-                assert agent.id not in [a.id for a in active_agents]
+            # Get active agents
+            active_agents = await factory.get_active_agents()
 
-    @pytest.mark.asyncio
-    async def test_get_active_agents(self):
-        """Test getting active agents."""
-        mock_db = Mock(spec=DatabaseManager)
-        mock_broker = Mock(spec=MessageBroker)
-        available_providers = {"anthropic": {"api_key": "test"}}
-
-        factory = DefaultAgentFactory(
-            database_manager=mock_db,
-            message_broker=mock_broker,
-            available_llm_providers=available_providers,
-        )
-
-        # Create multiple agents
-        agent1 = await factory.create_agent(
-            agent_type="code_agent",
-            name="Agent 1",
-            description="First agent",
-            capabilities=["test"],
-        )
-
-        agent2 = await factory.create_agent(
-            agent_type="code_agent",
-            name="Agent 2",
-            description="Second agent",
-            capabilities=["test"],
-        )
-
-        # Get active agents
-        active_agents = await factory.get_active_agents()
-
-        assert len(active_agents) == 2
+            assert len(active_agents) == 2
         agent_ids = [a.id for a in active_agents]
         assert agent1.id in agent_ids
         assert agent2.id in agent_ids

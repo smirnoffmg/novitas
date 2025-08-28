@@ -1,7 +1,5 @@
 """Tests for LLM Provider Selector."""
 
-from unittest.mock import Mock
-
 import pytest
 
 from novitas.agents.llm_provider_selector import DefaultLLMProviderSelector
@@ -15,7 +13,7 @@ class TestLLMProviderSelector:
     def test_llm_provider_selector_protocol(self):
         """Test that LLMProviderSelector is a proper protocol."""
         # This test ensures the protocol is properly defined
-        assert hasattr(LLMProviderSelector, "__call__")
+        assert callable(LLMProviderSelector)
 
     def test_default_llm_provider_selector_creation(self):
         """Test DefaultLLMProviderSelector can be instantiated."""

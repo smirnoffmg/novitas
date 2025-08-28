@@ -50,7 +50,6 @@ async def initialize_system_components():
     logger.info("Initializing message broker...")
     message_broker = get_message_broker()
     # Skip message broker connection for demo to avoid potential deadlock
-    # await message_broker.connect()
     logger.info("Message broker initialization skipped for demo")
 
     return database_manager, message_broker, available_providers
@@ -77,7 +76,7 @@ async def create_orchestrator_agent(
         agents for code analysis, documentation, and testing. Always think strategically
         and provide clear, actionable plans. When creating agents, provide detailed,
         specific prompts that will make them effective at their tasks.
-        
+
         You are also responsible for selecting the best LLM provider and model for each task
         based on the available options. Consider factors like model capabilities, cost,
         and performance when making your decisions.""",
@@ -128,9 +127,11 @@ async def run_improvement_cycle(
         print("DEMO: STEP 1: About to initialize system components")
         logger.info("STEP 1: About to initialize system components")
         # Initialize system components
-        database_manager, message_broker, available_providers = (
-            await initialize_system_components()
-        )
+        (
+            database_manager,
+            message_broker,
+            available_providers,
+        ) = await initialize_system_components()
         logger.info("STEP 1 COMPLETE: System components initialized")
 
         logger.info("STEP 2: About to create orchestrator agent")
@@ -237,7 +238,6 @@ async def run_improvement_cycle(
         # Cleanup
         await orchestrator.cleanup()
         # Skip message broker disconnect for demo
-        # await message_broker.disconnect()
         await database_manager.disconnect()
 
         logger.info("Improvement cycle completed successfully", cycle_id=cycle_id)

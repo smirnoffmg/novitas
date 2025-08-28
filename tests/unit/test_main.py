@@ -1,5 +1,6 @@
 """Tests for the main module."""
 
+from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
@@ -12,13 +13,32 @@ class TestMain:
     """Test main module functionality."""
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_success(self) -> None:
         """Test successful improvement cycle execution."""
-        # The current implementation is just a skeleton, so we test the basic flow
-        await run_improvement_cycle(daily=False, force=False)
-        # If we get here without exception, the test passes
+        # Mock the orchestrator's create_specialized_agent method to avoid real API calls
+        with (
+            patch(
+                "novitas.agents.orchestrator.OrchestratorAgent.create_specialized_agent"
+            ) as mock_create_agent,
+            patch(
+                "novitas.llm.provider.generate_structured_response"
+            ) as mock_generate_response,
+        ):
+            mock_create_agent.return_value = "mock-agent-id"
+
+            # Mock the structured response to avoid real API calls
+            mock_response = Mock()
+            mock_response.proposals = []
+            mock_generate_response.return_value = mock_response
+
+            await run_improvement_cycle(daily=False, force=False)
+
+            # Verify that agents were created
+            assert mock_create_agent.call_count >= 2  # At least code and doc agents
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_failure(self) -> None:
         """Test improvement cycle execution failure."""
         # Mock the ImprovementCycle.complete method to raise an exception on the first call
@@ -31,20 +51,57 @@ class TestMain:
                 await run_improvement_cycle(daily=False, force=False)
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_daily_mode(self) -> None:
         """Test improvement cycle in daily mode."""
-        # The current implementation accepts daily parameter but doesn't use it
-        await run_improvement_cycle(daily=True, force=False)
-        # If we get here without exception, the test passes
+        # Mock the orchestrator's create_specialized_agent method to avoid real API calls
+        with (
+            patch(
+                "novitas.agents.orchestrator.OrchestratorAgent.create_specialized_agent"
+            ) as mock_create_agent,
+            patch(
+                "novitas.llm.provider.generate_structured_response"
+            ) as mock_generate_response,
+        ):
+            mock_create_agent.return_value = "mock-agent-id"
+
+            # Mock the structured response to avoid real API calls
+            mock_response = Mock()
+            mock_response.proposals = []
+            mock_generate_response.return_value = mock_response
+
+            await run_improvement_cycle(daily=True, force=False)
+
+            # Verify that agents were created
+            assert mock_create_agent.call_count >= 2  # At least code and doc agents
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_force_mode(self) -> None:
         """Test improvement cycle in force mode."""
-        # The current implementation accepts force parameter but doesn't use it
-        await run_improvement_cycle(daily=False, force=True)
-        # If we get here without exception, the test passes
+        # Mock the orchestrator's create_specialized_agent method to avoid real API calls
+        with (
+            patch(
+                "novitas.agents.orchestrator.OrchestratorAgent.create_specialized_agent"
+            ) as mock_create_agent,
+            patch(
+                "novitas.llm.provider.generate_structured_response"
+            ) as mock_generate_response,
+        ):
+            mock_create_agent.return_value = "mock-agent-id"
+
+            # Mock the structured response to avoid real API calls
+            mock_response = Mock()
+            mock_response.proposals = []
+            mock_generate_response.return_value = mock_response
+
+            await run_improvement_cycle(daily=False, force=True)
+
+            # Verify that agents were created
+            assert mock_create_agent.call_count >= 2  # At least code and doc agents
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_with_cycle_creation(self) -> None:
         """Test improvement cycle with cycle creation."""
         # The current implementation creates an ImprovementCycle
@@ -59,6 +116,7 @@ class TestMain:
             mock_cycle.complete.assert_called_once_with(success=True)
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_logging(self) -> None:
         """Test that improvement cycle logs appropriately."""
         with patch("novitas.main.logger") as mock_logger:
@@ -69,6 +127,7 @@ class TestMain:
             assert mock_logger.error.call_count == 0  # No errors in success case
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_error_logging(self) -> None:
         """Test that improvement cycle logs errors appropriately."""
         with patch("novitas.main.ImprovementCycle") as mock_cycle_class:
@@ -84,6 +143,7 @@ class TestMain:
                 assert mock_logger.error.called
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_cycle_completion(self) -> None:
         """Test that the cycle is properly completed."""
         with patch("novitas.main.ImprovementCycle") as mock_cycle_class:
@@ -95,6 +155,7 @@ class TestMain:
             mock_cycle.complete.assert_called_once_with(success=True)
 
     @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_run_improvement_cycle_cycle_completion_on_error(self) -> None:
         """Test that the cycle is properly completed on error."""
         with patch("novitas.main.ImprovementCycle") as mock_cycle_class:

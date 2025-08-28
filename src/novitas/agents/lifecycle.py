@@ -92,8 +92,6 @@ class AgentLifecycleManager:
         if agent_id not in self._agents:
             raise AgentError(f"Agent {agent_id} is not registered")
 
-        agent = self._agents[agent_id]
-
         # Ensure agent is cleaned up
         if self._status[agent_id] != AgentStatus.TERMINATED:
             await self.terminate_agent(agent_id)

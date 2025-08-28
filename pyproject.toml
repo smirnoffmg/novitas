@@ -26,18 +26,18 @@ dependencies = [
     "langchain-anthropic>=0.1.0",
     "pydantic>=2.5.0",
     "sqlalchemy>=2.0.0",
-    "greenlet>=3.0.0", # Required for SQLAlchemy async
-    "asyncpg>=0.29.0", # PostgreSQL async driver
-    "aiosqlite>=0.19.0", # SQLite async driver for testing
+    "greenlet>=3.0.0",            # Required for SQLAlchemy async
+    "asyncpg>=0.29.0",            # PostgreSQL async driver
+    "aiosqlite>=0.19.0",          # SQLite async driver for testing
     "redis>=5.0.0",
     "structlog>=23.0.0",
     "typer>=0.9.0",
     "rich>=13.0.0",
     "pydantic-settings>=2.1.0",
     "httpx>=0.26.0",
-    "tenacity>=8.2.0", # For retry logic
+    "tenacity>=8.2.0",            # For retry logic
     "pydantic-core>=2.14.0",
-    "alembic>=1.13.0", # Database migrations
+    "alembic>=1.13.0",            # Database migrations
 ]
 
 [project.optional-dependencies]
@@ -47,6 +47,7 @@ dev = [
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.12.0",
     "pytest-xdist>=3.5.0",    # Parallel test execution
+    "pytest-timeout>=2.2.0",  # Test timeout functionality
     "coverage[toml]>=7.4.0",
     "pre-commit>=3.6.0",
 ]
@@ -207,7 +208,8 @@ addopts = [
     "--no-cov",
     "-v",
     "--tb=short",
-    "-m", "not integration and not slow",
+    "-m",
+    "not integration and not slow",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -220,10 +222,7 @@ markers = [
     "unit: marks tests as unit tests",
     "db: marks tests that require database",
 ]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::UserWarning",
-]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
 
 [tool.coverage.run]
 source = ["src"]

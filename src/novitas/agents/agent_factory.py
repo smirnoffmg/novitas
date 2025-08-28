@@ -8,18 +8,15 @@ from uuid import uuid4
 
 from ..config.logging import get_logger
 from ..core.exceptions import AgentError
-from ..core.models import AgentType
 from ..core.protocols import Agent
 from ..core.protocols import DatabaseManager
 from ..core.protocols import MessageBroker
 from ..core.schemas import AgentPrompt
-from ..llm.client_adapter import LLMClientAdapter
 from ..llm.provider import LLMConfig
 from ..llm.provider import create_llm_provider
 from ..llm.provider import generate_structured_response
-from .base import BaseAgent
-from .code_agent import CodeAgent
 from .llm_provider_selector import DefaultLLMProviderSelector
+from .orchestrator import OrchestratorAgent
 
 
 class AgentFactory(Protocol):
@@ -27,15 +24,13 @@ class AgentFactory(Protocol):
 
     async def create_agent(
         self,
-        agent_type: str,
         name: str,
         description: str,
         capabilities: list[str],
     ) -> Agent:
-        """Create a new agent of the specified type.
+        """Create a new orchestrator agent.
 
         Args:
-            agent_type: Type of agent to create
             name: Agent name
             description: Agent description
             capabilities: List of agent capabilities
@@ -96,15 +91,13 @@ class DefaultAgentFactory:
 
     async def create_agent(
         self,
-        agent_type: str,
         name: str,
         description: str,
         capabilities: list[str],
     ) -> Agent:
-        """Create a new agent of the specified type.
+        """Create a new orchestrator agent.
 
         Args:
-            agent_type: Type of agent to create
             name: Agent name
             description: Agent description
             capabilities: List of agent capabilities
@@ -116,8 +109,7 @@ class DefaultAgentFactory:
             AgentError: If agent creation fails
         """
         self.logger.info(
-            "Creating agent",
-            agent_type=agent_type,
+            "Creating orchestrator agent",
             name=name,
             capabilities=capabilities,
         )
@@ -125,9 +117,9 @@ class DefaultAgentFactory:
         if not self.available_llm_providers:
             raise AgentError("No LLM providers available")
 
-        # Select the best LLM provider for this agent type
-        selected_provider = self.llm_provider_selector.select_provider_for_agent_type(
-            agent_type, self.available_llm_providers
+        # Select the best LLM provider for the orchestrator
+        selected_provider = self.llm_provider_selector.select_provider_for_orchestrator(
+            self.available_llm_providers
         )
 
         # Create LLM client for this agent
@@ -138,14 +130,13 @@ class DefaultAgentFactory:
             max_tokens=2000,
         )
         llm_provider = create_llm_provider(llm_config)
-        llm_client = LLMClientAdapter(llm_provider)
 
         try:
             # Generate agent prompt using LLM
             prompt_generation_prompt = f"""
-            Create a specialized prompt for a {agent_type} agent named "{name}".
+            Create a specialized prompt for an orchestrator agent named "{name}".
 
-            Agent capabilities: {', '.join(capabilities)}
+            Agent capabilities: {", ".join(capabilities)}
             Agent description: {description}
 
             Generate a clear, focused prompt that will help this agent perform its specialized tasks effectively.
@@ -168,13 +159,15 @@ class DefaultAgentFactory:
 
             prompt = agent_prompt_result.prompt
 
-            # Create the appropriate agent type
-            agent = self._create_agent_instance(
-                agent_type=agent_type,
+            # Create the orchestrator agent
+            agent = OrchestratorAgent(
+                database_manager=self.database_manager,
+                available_llm_providers=self.available_llm_providers,
+                message_broker=self.message_broker,
+                agent_id=uuid4(),  # Generate new ID
                 name=name,
                 description=description,
                 prompt=prompt,
-                llm_client=llm_client,
             )
 
             # Initialize the agent
@@ -184,9 +177,8 @@ class DefaultAgentFactory:
             self.active_agents[agent.id] = agent
 
             self.logger.info(
-                "Created agent successfully",
+                "Created orchestrator agent successfully",
                 agent_id=agent.id,
-                agent_type=agent_type,
                 name=name,
             )
 
@@ -194,48 +186,11 @@ class DefaultAgentFactory:
 
         except Exception as e:
             self.logger.error(
-                "Error creating agent",
-                agent_type=agent_type,
+                "Error creating orchestrator agent",
                 name=name,
                 error=str(e),
             )
-            raise AgentError(f"Failed to create {agent_type} agent: {e}") from e
-
-    def _create_agent_instance(
-        self,
-        agent_type: str,
-        name: str,
-        description: str,
-        prompt: str,
-        llm_client: LLMClientAdapter,
-    ) -> BaseAgent:
-        """Create an agent instance of the specified type.
-
-        Args:
-            agent_type: Type of agent to create
-            name: Agent name
-            description: Agent description
-            prompt: Agent prompt
-            llm_client: LLM client for the agent
-
-        Returns:
-            Agent instance
-
-        Raises:
-            AgentError: If agent type is unknown
-        """
-        if agent_type == "code_agent":
-            return CodeAgent(
-                database_manager=self.database_manager,
-                llm_client=llm_client,
-                message_broker=self.message_broker,
-                agent_id=uuid4(),  # Generate new ID
-                name=name,
-                description=description,
-                prompt=prompt,
-            )
-        else:
-            raise AgentError(f"Unknown agent type: {agent_type}")
+            raise AgentError(f"Failed to create orchestrator agent: {e}") from e
 
     async def retire_agent(self, agent_id: UUID, reason: str) -> None:
         """Retire an agent and archive its state.

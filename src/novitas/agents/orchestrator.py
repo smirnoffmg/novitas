@@ -2,6 +2,7 @@
 
 import asyncio
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 from uuid import UUID
 from uuid import uuid4
@@ -472,7 +473,7 @@ class OrchestratorAgent(BaseAgent):
         file_contents = {}
         for file_path in files_to_analyze:
             try:
-                with open(file_path, encoding="utf-8") as f:
+                with Path(file_path).open(encoding="utf-8") as f:
                     file_contents[file_path] = f.read()
                 self.logger.info(
                     f"WORKFLOW STEP 2.1: Read file {file_path} ({len(file_contents[file_path])} chars)"
@@ -494,13 +495,13 @@ class OrchestratorAgent(BaseAgent):
                     # Create analysis prompt for this file
                     analysis_prompt = f"""
                     Analyze this code file and suggest 1-2 specific improvements:
-                    
+
                     File: {file_path}
                     Content:
                     ```python
                     {file_contents[file_path][:4000]}
                     ```
-                    
+
                     Focus on practical, actionable improvements that would make the code better.
                     Provide specific diffs showing the exact code changes needed.
                     """
@@ -577,19 +578,19 @@ class OrchestratorAgent(BaseAgent):
         # Build evaluation prompt
         evaluation_prompt = f"""
         Evaluate the following change proposals and select the best ones:
-        
+
         Proposals:
         {[f"- {p.description} (confidence: {p.confidence_score})" for p in proposals]}
-        
+
         Evaluation criteria from previous experience:
         {[item.content for item in relevant_memory]}
-        
+
         Please select proposals based on:
         1. Impact vs effort ratio
         2. Confidence scores
         3. Alignment with project goals
         4. Risk assessment
-        
+
         Return only the proposals that should be implemented.
         """
 
@@ -597,19 +598,19 @@ class OrchestratorAgent(BaseAgent):
             # Evaluate proposals using LLM
             evaluation_prompt = f"""
             Evaluate the following change proposals and select the best ones:
-            
+
             Proposals:
             {[f"- {p.description} (confidence: {p.confidence_score}, type: {p.improvement_type})" for p in proposals]}
-            
+
             Evaluation criteria from previous experience:
             {[item.content for item in relevant_memory]}
-            
+
             Please select proposals based on:
             1. Impact vs effort ratio
             2. Confidence scores
             3. Alignment with project goals
             4. Risk assessment
-            
+
             Return only the proposals that should be implemented.
             """
 
@@ -668,9 +669,9 @@ class OrchestratorAgent(BaseAgent):
         # Get LLM analysis of performance
         analysis_prompt = f"""
         Analyze the performance of managed agents:
-        
+
         {performance_report["agent_performance"]}
-        
+
         Provide recommendations for:
         1. Which agents should be retired
         2. Which agents need prompt evolution
@@ -762,7 +763,8 @@ class OrchestratorAgent(BaseAgent):
             return {"error": str(e)}
 
     async def plan_system_evolution(
-        self, performance_data: dict[str, Any]  # noqa: ARG002
+        self,
+        performance_data: dict[str, Any],  # noqa: ARG002
     ) -> dict[str, Any]:
         """Plan system evolution based on performance data.
 

@@ -8,6 +8,7 @@ import pytest
 from langchain.memory import ConversationBufferMemory
 
 from novitas.agents.memory import LangChainMemoryManager
+from novitas.agents.memory import MemoryFilter
 from novitas.core.models import MemoryItem
 from novitas.core.models import MemoryType
 
@@ -98,7 +99,7 @@ class TestLangChainMemoryManager:
         """Test adding memory with TTL."""
         await memory_manager.register_agent(mock_agent)
 
-        memory_id = await memory_manager.add_memory(
+        await memory_manager.add_memory(
             agent_id=mock_agent.id,
             memory_type=MemoryType.EXPERIENCE,
             content={"experience": "test"},
@@ -130,7 +131,6 @@ class TestLangChainMemoryManager:
         )
 
         # Filter by memory type
-        from novitas.agents.memory import MemoryFilter
 
         filter_obj = MemoryFilter(memory_types=[MemoryType.CONVERSATION])
         memories = await memory_manager.get_memory(mock_agent.id, filter_obj)

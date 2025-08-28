@@ -59,6 +59,8 @@ graph TB
 
 ### 🎼 Orchestrator Agent
 
+The only pre-defined agent. It is responsible for:
+
 - **Role**: Central coordinator and decision maker
 - **Responsibilities**:
   - Creates daily execution sessions
@@ -67,40 +69,7 @@ graph TB
   - Manages agent lifecycle (creation, retirement, archival)
   - Creates pull requests with consolidated changes
 
-### 💻 Code Agent
 
-- **Role**: Code improvement specialist
-- **Responsibilities**:
-  - Analyzes code quality and performance
-  - Suggests refactoring and optimizations
-  - Identifies bugs and potential issues
-  - Proposes new features based on codebase analysis
-
-### 🧪 Test Agent
-
-- **Role**: Testing and quality assurance
-- **Responsibilities**:
-  - Improves test coverage
-  - Adds missing test cases
-  - Updates tests for code changes
-  - Suggests testing strategies
-
-### 📚 Documentation Agent
-
-- **Role**: Documentation maintenance
-- **Responsibilities**:
-  - Updates README and documentation
-  - Adds missing docstrings
-  - Maintains API documentation
-  - Creates architectural diagrams
-
-### 🎯 Prompt Agent
-
-- **Role**: Self-improvement of AI interactions
-- **Responsibilities**:
-  - Refines agent prompts for better performance
-  - Updates system prompts based on outcomes
-  - Optimizes LLM interactions
 
 ## 🔄 Daily Workflow
 

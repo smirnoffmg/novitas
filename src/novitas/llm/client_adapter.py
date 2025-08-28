@@ -18,12 +18,14 @@ class LLMClientAdapter(LLMClient):
         """
         self.llm_provider = llm_provider
 
-    async def generate_response(self, prompt: str, context: dict[str, Any]) -> str:
+    async def generate_response(
+        self, prompt: str, context: dict[str, Any] | None = None  # noqa: ARG002
+    ) -> str:
         """Generate a response from the LLM.
 
         Args:
             prompt: The prompt to send to the LLM
-            context: Additional context for the generation
+            context: Additional context (currently unused)
 
         Returns:
             The generated response

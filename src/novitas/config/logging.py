@@ -1,5 +1,6 @@
 """Logging configuration for the Novitas AI system."""
 
+import logging
 from typing import Any
 
 import structlog
@@ -14,7 +15,6 @@ def configure_logging() -> None:
     """Configure structured logging for the application."""
 
     # Configure standard library logging first
-    import logging
 
     # Set the log level from settings
     log_level = getattr(logging, settings.log_level.upper(), logging.INFO)

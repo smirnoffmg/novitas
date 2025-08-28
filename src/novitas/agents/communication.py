@@ -1,6 +1,7 @@
 """Agent communication system for the Novitas AI system."""
 
 import asyncio
+import contextlib
 from collections.abc import Callable
 from collections.abc import Coroutine
 from datetime import UTC
@@ -110,10 +111,8 @@ class AgentCommunicationManager:
         # Stop message processing
         if agent_id in self._processing_tasks:
             self._processing_tasks[agent_id].cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._processing_tasks[agent_id]
-            except asyncio.CancelledError:
-                pass
             del self._processing_tasks[agent_id]
 
         # Clear message queue

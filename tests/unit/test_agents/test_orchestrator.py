@@ -9,6 +9,7 @@ from novitas.agents.orchestrator import OrchestratorAgent
 from novitas.core.models import AgentType
 from novitas.core.models import ChangeProposal
 from novitas.core.models import ImprovementType
+from novitas.core.schemas import AgentPrompt
 
 
 class TestOrchestratorAgent:
@@ -90,8 +91,6 @@ class TestOrchestratorAgent:
 
         # Mock the generate_structured_response function
         async def mock_generate_structured_response(provider, prompt, schema, **kwargs):
-            from novitas.core.schemas import AgentPrompt
-
             return AgentPrompt(
                 prompt="You are a code analysis expert focused on Python code quality.",
                 reasoning="This prompt focuses the agent on code analysis tasks",
@@ -303,12 +302,12 @@ class TestOrchestratorAgent:
         async def mock_generate_response(provider, prompt):
             return """
             Evolved Prompt for Code Agent:
-            
+
             You are a code analysis expert. Focus on:
             1. Type hint enforcement
             2. Docstring generation
             3. Maintain existing strengths in naming and logic
-            
+
             Updated prompt: You are a Python code quality expert...
             """
 
@@ -412,8 +411,6 @@ class TestOrchestratorAgent:
 
         # Mock the generate_structured_response function
         async def mock_generate_structured_response(provider, prompt, schema, **kwargs):
-            from novitas.core.schemas import AgentPrompt
-
             return AgentPrompt(
                 prompt="Test agent prompt and configuration",
                 reasoning="Test reasoning",
