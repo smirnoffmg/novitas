@@ -78,17 +78,12 @@ class Settings(BaseSettings):
         description="OpenAI API key for LLM access",
         alias="OPENAI_API_KEY",
     )
-    openai_model: str = Field(
-        default="gpt-4-turbo-preview",
-        description="OpenAI model to use for agents",
-        alias="OPENAI_MODEL",
-    )
-    openai_temperature: float = Field(
-        default=0.1,
-        ge=0.0,
-        le=2.0,
-        description="Temperature for OpenAI API calls",
-        alias="OPENAI_TEMPERATURE",
+
+    # Anthropic configuration (12-factor: Backing services)
+    anthropic_api_key: str | None = Field(
+        default=None,
+        description="Anthropic API key for LLM access",
+        alias="ANTHROPIC_API_KEY",
     )
 
     # GitHub configuration (12-factor: Backing services)
@@ -140,6 +135,11 @@ class Settings(BaseSettings):
         default="daily-improvement",
         description="Prefix for improvement branch names",
         alias="IMPROVEMENT_BRANCH_PREFIX",
+    )
+    dry_run: bool = Field(
+        default=False,
+        description="Run in dry-run mode (no actual changes)",
+        alias="NOVITAS_DRY_RUN",
     )
 
     @property

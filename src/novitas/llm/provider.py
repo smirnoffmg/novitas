@@ -4,7 +4,6 @@ This module provides a simple interface for LLM providers using LangChain,
 leveraging their existing capabilities rather than reimplementing them.
 """
 
-import logging
 import os
 from collections.abc import AsyncIterator
 from typing import Any
@@ -15,12 +14,13 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
+from novitas.config.logging import get_logger
 from novitas.core.exceptions import LLMProviderError
 
 # Constants
 MAX_TEMPERATURE = 2.0
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class LLMProvider(Protocol):
@@ -84,11 +84,15 @@ def create_llm_provider(config: LLMConfig) -> LLMProvider:
         LLMProviderError: If initialization fails
     """
     try:
+        logger.info("Creating LLM provider", model=config.model)
+
         # Set API key in environment for LangChain to use
         if "gpt" in config.model.lower():
             os.environ["OPENAI_API_KEY"] = config.api_key
+            logger.info("Set OpenAI API key")
         elif "claude" in config.model.lower():
             os.environ["ANTHROPIC_API_KEY"] = config.api_key
+            logger.info("Set Anthropic API key")
         # Add more providers as needed - LangChain will handle them automatically
 
         # Filter out None values to avoid validation errors
@@ -100,9 +104,13 @@ def create_llm_provider(config: LLMConfig) -> LLMProvider:
         if config.max_tokens is not None:
             kwargs["max_tokens"] = config.max_tokens
 
-        return init_chat_model(**kwargs)
+        logger.info("Initializing chat model with LangChain", kwargs=kwargs)
+        provider = init_chat_model(**kwargs)
+        logger.info("LLM provider created successfully")
+        return provider
 
     except Exception as e:
+        logger.error("Failed to create LLM provider", error=str(e))
         raise LLMProviderError(f"Failed to initialize LLM provider: {e}") from e
 
 

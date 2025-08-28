@@ -1,6 +1,5 @@
 """Tests for memory models."""
 
-from datetime import UTC
 from datetime import datetime
 from uuid import uuid4
 
@@ -169,13 +168,14 @@ class TestMemoryItem:
         assert memory_item.metadata == {"source": "test"}
 
     def test_memory_item_timestamp_utc(self) -> None:
-        """Test that timestamp is in UTC."""
+        """Test that timestamp is timezone-naive for database compatibility."""
         memory_item = MemoryItem(
             memory_type=MemoryType.CONVERSATION,
             content={"test": "data"},
         )
 
-        assert memory_item.timestamp.tzinfo == UTC
+        # Timestamps are timezone-naive for database compatibility
+        assert memory_item.timestamp.tzinfo is None
 
     def test_memory_item_unique_ids(self) -> None:
         """Test that memory items have unique IDs."""

@@ -51,7 +51,9 @@ class ChangeProposal(BaseModel):
     reasoning: str
     proposed_changes: dict[str, Any]
     confidence_score: float = Field(ge=0.0, le=1.0)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
 
     @field_validator("confidence_score")
     @classmethod
@@ -73,13 +75,17 @@ class AgentState(BaseModel):
     prompt: str
     memory: dict[str, Any] = Field(default_factory=dict)
     performance_metrics: dict[str, float] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    last_active: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
+    last_active: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
 
     def increment_version(self) -> None:
         """Increment the agent's version."""
         self.version += 1
-        self.last_active = datetime.now(UTC)
+        self.last_active = datetime.now(UTC).replace(tzinfo=None)
 
 
 class ImprovementCycle(BaseModel):
@@ -87,7 +93,9 @@ class ImprovementCycle(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     cycle_number: int
-    start_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    start_time: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
     end_time: datetime | None = None
     agents_used: list[UUID] = Field(default_factory=list)
     changes_proposed: list[UUID] = Field(default_factory=list)
@@ -97,7 +105,7 @@ class ImprovementCycle(BaseModel):
 
     def complete(self, success: bool = True, error_message: str | None = None) -> None:
         """Mark the cycle as complete."""
-        self.end_time = datetime.now(UTC)
+        self.end_time = datetime.now(UTC).replace(tzinfo=None)
         self.success = success
         self.error_message = error_message
 
@@ -112,7 +120,9 @@ class SystemMetrics(BaseModel):
     total_changes_proposed: int = 0
     total_changes_accepted: int = 0
     average_cycle_duration: float = 0.0
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_updated: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
 
 
 class AgentAction(BaseModel):
@@ -122,7 +132,9 @@ class AgentAction(BaseModel):
     agent_id: UUID
     action_type: str
     details: dict[str, Any]
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
     success: bool = True
     error_message: str | None = None
     duration_seconds: float | None = None
@@ -147,7 +159,9 @@ class MemoryItem(BaseModel):
     content: dict[str, Any]
     tags: list[str] = Field(default_factory=list)
     importance: float = Field(default=1.0, ge=0.0, le=1.0)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
     ttl: float | None = None  # Time to live in seconds
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -178,7 +192,9 @@ class AgentMessage(BaseModel):
     message_type: MessageType
     content: str
     metadata: dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
     is_broadcast: bool = False
 
     def is_valid(self) -> bool:
@@ -195,11 +211,15 @@ class PromptTemplate(BaseModel):
     template: str
     version: int = 1
     is_active: bool = True
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
 
     def update_template(self, new_template: str) -> None:
         """Update the template and increment version."""
         self.template = new_template
         self.version += 1
-        self.updated_at = datetime.now(UTC)
+        self.updated_at = datetime.now(UTC).replace(tzinfo=None)

@@ -149,3 +149,21 @@ class LLMTimeoutError(LLMError):
     """Raised when an LLM operation times out."""
 
     pass
+
+
+class MessageBrokerError(NovitasError):
+    """Base exception for message broker errors."""
+
+    pass
+
+
+class MessageBrokerConnectionError(MessageBrokerError):
+    """Raised when there's an error connecting to the message broker."""
+
+    pass
+
+
+class MessageBrokerTimeoutError(MessageBrokerError):
+    """Raised when a message broker operation times out."""
+
+    pass

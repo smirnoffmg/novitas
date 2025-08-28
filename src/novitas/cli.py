@@ -62,9 +62,13 @@ def config() -> None:
     table.add_row("Debug Mode", str(settings.debug))
     table.add_row("Database URL", settings.database_url or "Auto-configured")
     table.add_row("Redis URL", settings.redis_url)
-    table.add_row("OpenAI Model", settings.openai_model)
+    table.add_row("OpenAI API Key", "Set" if settings.openai_api_key else "Not set")
+    table.add_row(
+        "Anthropic API Key", "Set" if settings.anthropic_api_key else "Not set"
+    )
     table.add_row("Max Agents per Cycle", str(settings.max_agents_per_cycle))
     table.add_row("Agent Timeout", f"{settings.agent_timeout_seconds}s")
+    table.add_row("Dry Run Mode", str(settings.dry_run))
 
     console.print(table)
 
@@ -72,6 +76,7 @@ def config() -> None:
 def _run_improvement_cycle(
     daily: bool = False,
     force: bool = False,
+    dry_run: bool = False,
     max_agents: int | None = None,
 ) -> None:
     """Wrapper to run improvement cycle synchronously."""
@@ -86,9 +91,13 @@ def _run_improvement_cycle(
             # Override settings if provided
             if max_agents:
                 settings.max_agents_per_cycle = max_agents
+            if dry_run:
+                settings.dry_run = dry_run
 
             # Run the async function
-            asyncio.run(run_improvement_cycle(daily=daily, force=force))
+            asyncio.run(
+                run_improvement_cycle(daily=daily, force=force, dry_run=dry_run)
+            )
 
             progress.update(task, description="Improvement cycle completed!")
 
@@ -108,12 +117,17 @@ def improve(
     force: bool = typer.Option(
         False, "--force", help="Force execution even if recent cycle exists"
     ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Run in dry-run mode (no actual changes)"
+    ),
     max_agents: int | None = typer.Option(
         None, "--max-agents", help="Override max agents per cycle"
     ),
 ) -> None:
-    """Run an improvement cycle."""
-    _run_improvement_cycle(daily=daily, force=force, max_agents=max_agents)
+    """Run an improvement cycle on the current codebase."""
+    _run_improvement_cycle(
+        daily=daily, force=force, dry_run=dry_run, max_agents=max_agents
+    )
 
 
 def _run_agents_command(

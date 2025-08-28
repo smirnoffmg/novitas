@@ -51,7 +51,7 @@ class TestCLI:
             result = self.runner.invoke(app, ["improve"])
             assert result.exit_code == 0
             mock_run_cycle.assert_called_once_with(
-                daily=False, force=False, max_agents=None
+                daily=False, force=False, dry_run=False, max_agents=None
             )
 
     def test_improve_command_with_daily_flag(self) -> None:
@@ -60,7 +60,7 @@ class TestCLI:
             result = self.runner.invoke(app, ["improve", "--daily"])
             assert result.exit_code == 0
             mock_run_cycle.assert_called_once_with(
-                daily=True, force=False, max_agents=None
+                daily=True, force=False, dry_run=False, max_agents=None
             )
 
     def test_improve_command_with_force_flag(self) -> None:
@@ -69,7 +69,7 @@ class TestCLI:
             result = self.runner.invoke(app, ["improve", "--force"])
             assert result.exit_code == 0
             mock_run_cycle.assert_called_once_with(
-                daily=False, force=True, max_agents=None
+                daily=False, force=True, dry_run=False, max_agents=None
             )
 
     def test_improve_command_with_max_agents(self) -> None:
@@ -78,7 +78,7 @@ class TestCLI:
             result = self.runner.invoke(app, ["improve", "--max-agents", "10"])
             assert result.exit_code == 0
             mock_run_cycle.assert_called_once_with(
-                daily=False, force=False, max_agents=10
+                daily=False, force=False, dry_run=False, max_agents=10
             )
 
     def test_improve_command_failure(self) -> None:

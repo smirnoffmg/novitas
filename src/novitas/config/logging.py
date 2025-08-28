@@ -13,6 +13,19 @@ from .settings import settings
 def configure_logging() -> None:
     """Configure structured logging for the application."""
 
+    # Configure standard library logging first
+    import logging
+
+    # Set the log level from settings
+    log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
+
+    # Configure root logger to show logs
+    logging.basicConfig(
+        level=log_level,
+        format="%(message)s",
+        force=True,  # Override any existing configuration
+    )
+
     # Configure structlog
     structlog.configure(
         processors=[

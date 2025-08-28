@@ -6,8 +6,6 @@ from uuid import uuid4
 
 import pytest
 from langchain.memory import ConversationBufferMemory
-from langchain_core.messages import AIMessage
-from langchain_core.messages import HumanMessage
 
 from novitas.agents.memory import LangChainMemoryManager
 from novitas.core.models import MemoryItem
