@@ -23,6 +23,7 @@ test-fast:
 
 lint:
 	uv run ruff check .
+	uv run bandit -r src/ --skip B404,B603,B608
 
 format:
 	uv run ruff format .

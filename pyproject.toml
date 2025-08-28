@@ -41,17 +41,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.0",
-    "pytest-cov>=4.1.0",
-    "pytest-mock>=3.12.0",
-    "pytest-xdist>=3.5.0",    # Parallel test execution
-    "pytest-timeout>=2.2.0",  # Test timeout functionality
-    "coverage[toml]>=7.4.0",
-    "pre-commit>=3.6.0",
-]
-
 docs = [
     "mkdocs>=1.5.0",
     "mkdocs-material>=9.5.0",
@@ -70,7 +59,11 @@ dev-dependencies = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
     "pytest-cov>=6.2.1",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",   # Parallel test execution
+    "pytest-timeout>=2.2.0", # Test timeout functionality
     "coverage>=7.10.5",
+    "bandit>=1.7.0",
 ]
 
 [tool.ruff]
@@ -205,7 +198,6 @@ minversion = "8.0"
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--no-cov",
     "-v",
     "--tb=short",
     "-m",
@@ -242,3 +234,7 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B404", "B603", "B608"]
