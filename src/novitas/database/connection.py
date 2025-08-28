@@ -1,5 +1,7 @@
 """Database connection and management for the Novitas AI system."""
 
+import subprocess
+import sys
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -39,7 +41,7 @@ class DatabaseManagerImpl(DatabaseManager):
         try:
             # Create async engine
             self._engine = create_async_engine(
-                settings.database_url,
+                settings.resolved_database_url,
                 echo=settings.debug,
                 pool_pre_ping=True,
             )
@@ -244,7 +246,7 @@ class DatabaseManagerImpl(DatabaseManager):
             raise
 
     async def migrate(self) -> None:
-        """Run database migrations."""
+        """Run database migrations using Alembic."""
         if not self._connected:
             raise RuntimeError("Database not connected")
 
@@ -252,12 +254,19 @@ class DatabaseManagerImpl(DatabaseManager):
             raise RuntimeError("Database engine not initialized")
 
         try:
-            # For now, just create tables
-            # In the future, this would use Alembic for migrations
-            async with self._engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
+            # Run Alembic migrations
+            result = subprocess.run(
+                [sys.executable, "-m", "alembic", "upgrade", "head"],
+                check=False,
+                capture_output=True,
+                text=True,
+                cwd=".",
+            )
 
-            logger.info("Database migrations completed")
+            if result.returncode != 0:
+                raise RuntimeError(f"Migration failed: {result.stderr}")
+
+            logger.info("Database migrations completed successfully")
 
         except Exception as e:
             logger.error("Failed to run migrations", error=str(e))

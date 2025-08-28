@@ -243,8 +243,9 @@ class ChangeProposalRepository(BaseRepository):
             await self.session.commit()
 
     async def get_by_cycle_id(
-        self, cycle_id: str
-    ) -> list[ChangeProposal]:  # noqa: ARG002
+        self,
+        cycle_id: str,  # noqa: ARG002
+    ) -> list[ChangeProposal]:
         """Get change proposals by cycle ID."""
         # This would need a cycle_id field in the model or a join table
         # For now, return all proposals

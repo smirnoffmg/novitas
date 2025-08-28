@@ -125,3 +125,27 @@ class PromptValidationError(PromptError):
     """Raised when a prompt fails validation."""
 
     pass
+
+
+class LLMError(NovitasError):
+    """Base exception for LLM-related errors."""
+
+    pass
+
+
+class LLMProviderError(LLMError):
+    """Raised when there's an error with LLM provider operations."""
+
+    pass
+
+
+class LLMResponseError(LLMError):
+    """Raised when there's an error with LLM response processing."""
+
+    pass
+
+
+class LLMTimeoutError(LLMError):
+    """Raised when an LLM operation times out."""
+
+    pass

@@ -1,6 +1,6 @@
 # Novitas Makefile - Laconic and efficient
 
-.PHONY: help install test lint format clean db-test
+.PHONY: help install test lint format clean db-test config-list config-validate config-setup
 
 # Default target
 help:
@@ -13,10 +13,31 @@ help:
 	@echo "  format     - Format code (ruff format)"
 	@echo "  clean      - Clean cache and temporary files"
 	@echo "  db-test    - Run database layer test"
+	@echo ""
+	@echo "12-Factor Configuration Commands:"
+	@echo "  config-list     - List available environments"
+	@echo "  config-validate - Validate environment config (ENV=<env>)"
+	@echo "  config-setup    - Setup environment config (ENV=<env>)"
 
 # Install dependencies
 install:
 	uv sync --all-extras
+
+# 12-Factor Configuration Management
+config-list:
+	uv run python scripts/config.py list
+
+config-validate:
+	@echo "Usage: make config-validate ENV=<environment>"
+	@echo "Example: make config-validate ENV=development"
+	@if [ -z "$(ENV)" ]; then echo "Error: ENV variable is required"; exit 1; fi
+	uv run python scripts/config.py validate $(ENV)
+
+config-setup:
+	@echo "Usage: make config-setup ENV=<environment>"
+	@echo "Example: make config-setup ENV=development"
+	@if [ -z "$(ENV)" ]; then echo "Error: ENV variable is required"; exit 1; fi
+	uv run python scripts/config.py setup $(ENV)
 
 # Run all tests
 test:

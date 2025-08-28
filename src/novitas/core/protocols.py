@@ -85,6 +85,16 @@ class DatabaseManager(Protocol):
         """Get the latest improvement cycle."""
         ...
 
+    async def save_agent_memory(
+        self, agent_id: UUID, memory_data: dict[str, Any]
+    ) -> None:
+        """Save agent memory to the database."""
+        ...
+
+    async def load_agent_memory(self, agent_id: UUID) -> dict[str, Any] | None:
+        """Load agent memory from the database."""
+        ...
+
 
 @runtime_checkable
 class MessageBroker(Protocol):

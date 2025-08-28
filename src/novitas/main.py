@@ -12,8 +12,9 @@ logger = get_logger(__name__)
 
 
 async def run_improvement_cycle(
-    daily: bool = False, force: bool = False
-) -> None:  # noqa: ARG001
+    daily: bool = False,
+    force: bool = False,  # noqa: ARG001
+) -> None:
     """Run a complete improvement cycle.
 
     Args:

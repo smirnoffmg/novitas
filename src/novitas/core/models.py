@@ -128,6 +128,64 @@ class AgentAction(BaseModel):
     duration_seconds: float | None = None
 
 
+class MemoryType(str, Enum):
+    """Types of memory items."""
+
+    CONVERSATION = "conversation"
+    KNOWLEDGE = "knowledge"
+    EXPERIENCE = "experience"
+    TASK_RESULT = "task_result"
+    ERROR = "error"
+    METADATA = "metadata"
+
+
+class MemoryItem(BaseModel):
+    """A memory item for agents."""
+
+    id: UUID = Field(default_factory=uuid4)
+    memory_type: MemoryType
+    content: dict[str, Any]
+    tags: list[str] = Field(default_factory=list)
+    importance: float = Field(default=1.0, ge=0.0, le=1.0)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    ttl: float | None = None  # Time to live in seconds
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("importance")
+    @classmethod
+    def validate_importance(cls, v: float) -> float:
+        if not 0.0 <= v <= 1.0:
+            raise ValueError("importance must be between 0.0 and 1.0")
+        return v
+
+
+class MessageType(str, Enum):
+    """Types of messages between agents."""
+
+    TEXT = "text"
+    COMMAND = "command"
+    RESPONSE = "response"
+    ERROR = "error"
+    STATUS = "status"
+
+
+class AgentMessage(BaseModel):
+    """A message between agents."""
+
+    id: UUID = Field(default_factory=uuid4)
+    sender_id: UUID
+    recipient_id: UUID | None = None
+    message_type: MessageType
+    content: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    is_broadcast: bool = False
+
+    def is_valid(self) -> bool:
+        """Check if the message is valid."""
+        return bool(self.content.strip() and self.sender_id)
+
+
 class PromptTemplate(BaseModel):
     """A prompt template for agents."""
 

@@ -1,5 +1,24 @@
 """Core package for Novitas."""
 
+from .events import AgentCompleted
+from .events import AgentCreated
+from .events import AgentExecuted
+from .events import AgentInitialized
+from .events import AgentRetired
+from .events import AgentStatusChanged
+from .events import ChangeProposalAccepted
+from .events import ChangeProposalApplied
+from .events import ChangeProposalCreated
+from .events import ChangeProposalRejected
+from .events import DomainEvent
+from .events import EventFactory
+from .events import EventHandler
+from .events import EventStore
+from .events import ImprovementCycleCompleted
+from .events import ImprovementCycleFailed
+from .events import ImprovementCycleStarted
+from .events import SystemInitialized
+from .events import SystemShutdown
 from .exceptions import AgentError
 from .exceptions import ChangeProposalError
 from .exceptions import ConfigurationError
@@ -30,21 +49,39 @@ __all__ = [
     "Agent",
     # Models
     "AgentAction",
+    # Events
+    "AgentCompleted",
+    "AgentCreated",
     # Exceptions
     "AgentError",
+    "AgentExecuted",
     "AgentFactory",
+    "AgentInitialized",
+    "AgentRetired",
     "AgentState",
     "AgentStatus",
+    "AgentStatusChanged",
     "AgentType",
     "ChangeProposal",
+    "ChangeProposalAccepted",
+    "ChangeProposalApplied",
+    "ChangeProposalCreated",
     "ChangeProposalError",
+    "ChangeProposalRejected",
     "ConfigurationError",
     "DatabaseError",
     "DatabaseManager",
+    "DomainEvent",
+    "EventFactory",
+    "EventHandler",
+    "EventStore",
     "GitHubError",
     "GitManager",
     "ImprovementCycle",
+    "ImprovementCycleCompleted",
     "ImprovementCycleError",
+    "ImprovementCycleFailed",
+    "ImprovementCycleStarted",
     "ImprovementType",
     "LLMClient",
     "MessageBroker",
@@ -52,5 +89,7 @@ __all__ = [
     "PromptError",
     "PromptManager",
     "PromptTemplate",
+    "SystemInitialized",
     "SystemMetrics",
+    "SystemShutdown",
 ]
