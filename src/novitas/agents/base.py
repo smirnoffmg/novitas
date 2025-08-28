@@ -3,9 +3,6 @@
 import asyncio
 from abc import abstractmethod
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
 from uuid import UUID
 from uuid import uuid4
 
@@ -33,7 +30,7 @@ class BaseAgent(Agent):
         database_manager: DatabaseManager,
         llm_client: LLMClient,
         message_broker: MessageBroker,
-        agent_id: Optional[UUID] = None,
+        agent_id: UUID | None = None,
     ) -> None:
         """Initialize the base agent.
 
@@ -91,14 +88,14 @@ class BaseAgent(Agent):
             self.logger.error(
                 "Failed to initialize agent", agent_id=self.id, error=str(e)
             )
-            raise AgentError(f"Failed to initialize agent {self.name}: {e}")
+            raise AgentError(f"Failed to initialize agent {self.name}: {e}") from e
 
     @abstractmethod
     async def _initialize_agent(self) -> None:
         """Agent-specific initialization logic."""
         pass
 
-    async def execute(self, context: Dict[str, Any]) -> List[ChangeProposal]:
+    async def execute(self, context: dict[str, Any]) -> list[ChangeProposal]:
         """Execute the agent's main logic.
 
         Args:
@@ -157,15 +154,15 @@ class BaseAgent(Agent):
 
             return proposals
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.error("Agent execution timed out", agent_id=self.id)
-            raise AgentTimeoutError(f"Agent {self.name} execution timed out")
+            raise AgentTimeoutError(f"Agent {self.name} execution timed out") from None
         except Exception as e:
             self.logger.error("Agent execution failed", agent_id=self.id, error=str(e))
-            raise AgentError(f"Agent {self.name} execution failed: {e}")
+            raise AgentError(f"Agent {self.name} execution failed: {e}") from e
 
     @abstractmethod
-    async def _execute_agent(self, context: Dict[str, Any]) -> List[ChangeProposal]:
+    async def _execute_agent(self, context: dict[str, Any]) -> list[ChangeProposal]:
         """Agent-specific execution logic.
 
         Args:
@@ -183,13 +180,13 @@ class BaseAgent(Agent):
             self.logger.info("Agent cleanup completed", agent_id=self.id)
         except Exception as e:
             self.logger.error("Agent cleanup failed", agent_id=self.id, error=str(e))
-            raise AgentError(f"Agent {self.name} cleanup failed: {e}")
+            raise AgentError(f"Agent {self.name} cleanup failed: {e}") from e
 
     async def _cleanup_agent(self) -> None:
         """Agent-specific cleanup logic."""
         pass
 
-    def get_performance_metrics(self) -> Dict[str, float]:
+    def get_performance_metrics(self) -> dict[str, float]:
         """Get the agent's performance metrics.
 
         Returns:
@@ -210,7 +207,7 @@ class BaseAgent(Agent):
 
         self.logger.info("Agent prompt updated", agent_id=self.id)
 
-    async def send_message(self, to_agent: UUID, message: Dict[str, Any]) -> None:
+    async def send_message(self, to_agent: UUID, message: dict[str, Any]) -> None:
         """Send a message to another agent.
 
         Args:
@@ -219,7 +216,7 @@ class BaseAgent(Agent):
         """
         await self.message_broker.send_message(to_agent, message)
 
-    async def receive_message(self) -> Optional[Dict[str, Any]]:
+    async def receive_message(self) -> dict[str, Any] | None:
         """Receive a message for this agent.
 
         Returns:

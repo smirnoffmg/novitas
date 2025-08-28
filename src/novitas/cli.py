@@ -1,8 +1,5 @@
 """Command-line interface for the Novitas AI system."""
 
-import asyncio
-from typing import Optional
-
 import typer
 from rich.console import Console
 from rich.progress import Progress
@@ -13,6 +10,8 @@ from rich.table import Table
 from .config.logging import configure_logging
 from .config.logging import get_logger
 from .config.settings import settings
+from .database.connection import get_database_manager
+from .main import run_improvement_cycle
 
 # Initialize CLI app
 app = typer.Typer(
@@ -74,14 +73,12 @@ async def improve(
     force: bool = typer.Option(
         False, "--force", help="Force execution even if recent cycle exists"
     ),
-    max_agents: Optional[int] = typer.Option(
+    max_agents: int | None = typer.Option(
         None, "--max-agents", help="Override max agents per cycle"
     ),
 ) -> None:
     """Run an improvement cycle."""
     try:
-        from .main import run_improvement_cycle
-
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -104,21 +101,19 @@ async def improve(
     except Exception as e:
         console.print(f"[bold red]✗[/bold red] Improvement cycle failed: {e}")
         logger.error("Improvement cycle failed", error=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
 async def agents(
     list: bool = typer.Option(False, "--list", "-l", help="List all agents"),
-    status: Optional[str] = typer.Option(None, "--status", help="Filter by status"),
+    status: str | None = typer.Option(None, "--status", help="Filter by status"),
     show_metrics: bool = typer.Option(
         False, "--metrics", "-m", help="Show performance metrics"
     ),
 ) -> None:
     """Manage agents."""
     try:
-        from .database.connection import get_database_manager
-
         db_manager = get_database_manager()
         await db_manager.connect()
 
@@ -161,7 +156,7 @@ async def agents(
     except Exception as e:
         console.print(f"[bold red]✗[/bold red] Failed to manage agents: {e}")
         logger.error("Agent management failed", error=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -174,8 +169,6 @@ async def cycles(
 ) -> None:
     """View improvement cycles."""
     try:
-        from .database.connection import get_database_manager
-
         db_manager = get_database_manager()
         await db_manager.connect()
 
@@ -232,7 +225,7 @@ async def cycles(
     except Exception as e:
         console.print(f"[bold red]✗[/bold red] Failed to view cycles: {e}")
         logger.error("Cycle viewing failed", error=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -245,8 +238,6 @@ async def db(
 ) -> None:
     """Database management commands."""
     try:
-        from .database.connection import get_database_manager
-
         db_manager = get_database_manager()
 
         if status:
@@ -286,7 +277,7 @@ async def db(
     except Exception as e:
         console.print(f"[bold red]✗[/bold red] Database operation failed: {e}")
         logger.error("Database operation failed", error=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":

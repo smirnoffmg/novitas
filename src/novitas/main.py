@@ -1,19 +1,19 @@
 """Main module for the Novitas AI system."""
 
 import asyncio
-from typing import Optional
 from uuid import uuid4
 
 from .config.logging import configure_logging
 from .config.logging import get_logger
-from .config.settings import settings
 from .core.exceptions import ImprovementCycleError
 from .core.models import ImprovementCycle
 
 logger = get_logger(__name__)
 
 
-async def run_improvement_cycle(daily: bool = False, force: bool = False) -> None:
+async def run_improvement_cycle(
+    daily: bool = False, force: bool = False
+) -> None:  # noqa: ARG001
     """Run a complete improvement cycle.
 
     Args:
@@ -46,7 +46,7 @@ async def run_improvement_cycle(daily: bool = False, force: bool = False) -> Non
     except Exception as e:
         logger.error("Improvement cycle failed", cycle_id=cycle_id, error=str(e))
         cycle.complete(success=False, error_message=str(e))
-        raise ImprovementCycleError(f"Improvement cycle failed: {e}")
+        raise ImprovementCycleError(f"Improvement cycle failed: {e}") from e
 
 
 async def main() -> None:

@@ -3,9 +3,6 @@
 from abc import ABC
 from abc import abstractmethod
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
 from typing import Protocol
 from typing import runtime_checkable
 from uuid import UUID
@@ -28,7 +25,7 @@ class Agent(Protocol):
         """Initialize the agent."""
         ...
 
-    async def execute(self, context: Dict[str, Any]) -> List[ChangeProposal]:
+    async def execute(self, context: dict[str, Any]) -> list[ChangeProposal]:
         """Execute the agent's main logic.
 
         Args:
@@ -43,7 +40,7 @@ class Agent(Protocol):
         """Clean up agent resources."""
         ...
 
-    def get_performance_metrics(self) -> Dict[str, float]:
+    def get_performance_metrics(self) -> dict[str, float]:
         """Get the agent's performance metrics.
 
         Returns:
@@ -68,7 +65,7 @@ class DatabaseManager(Protocol):
         """Save an agent's state to the database."""
         ...
 
-    async def load_agent_state(self, agent_id: UUID) -> Optional[AgentState]:
+    async def load_agent_state(self, agent_id: UUID) -> AgentState | None:
         """Load an agent's state from the database."""
         ...
 
@@ -76,7 +73,7 @@ class DatabaseManager(Protocol):
         """Save a change proposal to the database."""
         ...
 
-    async def get_change_proposals(self, cycle_id: UUID) -> List[ChangeProposal]:
+    async def get_change_proposals(self, cycle_id: UUID) -> list[ChangeProposal]:
         """Get all change proposals for a cycle."""
         ...
 
@@ -84,7 +81,7 @@ class DatabaseManager(Protocol):
         """Save an improvement cycle to the database."""
         ...
 
-    async def get_latest_cycle(self) -> Optional[ImprovementCycle]:
+    async def get_latest_cycle(self) -> ImprovementCycle | None:
         """Get the latest improvement cycle."""
         ...
 
@@ -93,15 +90,15 @@ class DatabaseManager(Protocol):
 class MessageBroker(Protocol):
     """Protocol for message passing between agents."""
 
-    async def send_message(self, to_agent: UUID, message: Dict[str, Any]) -> None:
+    async def send_message(self, to_agent: UUID, message: dict[str, Any]) -> None:
         """Send a message to an agent."""
         ...
 
-    async def receive_message(self, agent_id: UUID) -> Optional[Dict[str, Any]]:
+    async def receive_message(self, agent_id: UUID) -> dict[str, Any] | None:
         """Receive a message for an agent."""
         ...
 
-    async def broadcast_message(self, message: Dict[str, Any]) -> None:
+    async def broadcast_message(self, message: dict[str, Any]) -> None:
         """Broadcast a message to all agents."""
         ...
 
@@ -133,7 +130,7 @@ class GitManager(Protocol):
         """Create a new branch."""
         ...
 
-    async def commit_changes(self, message: str, files: List[str]) -> None:
+    async def commit_changes(self, message: str, files: list[str]) -> None:
         """Commit changes to the repository."""
         ...
 
@@ -154,7 +151,7 @@ class GitManager(Protocol):
 class LLMClient(Protocol):
     """Protocol for LLM client operations."""
 
-    async def generate_response(self, prompt: str, context: Dict[str, Any]) -> str:
+    async def generate_response(self, prompt: str, context: dict[str, Any]) -> str:
         """Generate a response from the LLM."""
         ...
 
@@ -162,7 +159,7 @@ class LLMClient(Protocol):
         """Evaluate a change proposal and return a score."""
         ...
 
-    async def analyze_code(self, code: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def analyze_code(self, code: str, context: dict[str, Any]) -> dict[str, Any]:
         """Analyze code and return insights."""
         ...
 
@@ -181,6 +178,6 @@ class AgentFactory(ABC):
         pass
 
     @abstractmethod
-    async def get_active_agents(self) -> List[Agent]:
+    async def get_active_agents(self) -> list[Agent]:
         """Get all currently active agents."""
         pass

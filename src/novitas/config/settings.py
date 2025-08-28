@@ -1,7 +1,5 @@
 """Configuration settings for the Novitas AI system."""
 
-from typing import Optional
-
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -25,7 +23,7 @@ class Settings(BaseSettings):
     )
 
     # OpenAI settings
-    openai_api_key: Optional[str] = Field(
+    openai_api_key: str | None = Field(
         default=None, description="OpenAI API key for LLM access"
     )
     openai_model: str = Field(
@@ -36,7 +34,7 @@ class Settings(BaseSettings):
     )
 
     # GitHub settings
-    github_token: Optional[str] = Field(
+    github_token: str | None = Field(
         default=None, description="GitHub token for repository access"
     )
     github_repo: str = Field(

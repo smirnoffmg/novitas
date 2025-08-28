@@ -12,7 +12,7 @@ from .config.settings import settings
 configure_logging()
 
 __all__ = [
-    "settings",
     "configure_logging",
     "get_logger",
+    "settings",
 ]

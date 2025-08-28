@@ -1,14 +1,11 @@
 """Logging configuration for the Novitas AI system."""
 
-import sys
 from typing import Any
-from typing import Dict
 
 import structlog
 from structlog.processors import JSONRenderer
 from structlog.processors import TimeStamper
 from structlog.stdlib import LoggerFactory
-from structlog.types import Processor
 
 from .settings import settings
 
@@ -56,7 +53,7 @@ def log_agent_action(
     logger: Any,
     agent_id: str,
     action: str,
-    details: Dict[str, Any],
+    details: dict[str, Any],
     success: bool = True,
 ) -> None:
     """Log an agent action with structured data.

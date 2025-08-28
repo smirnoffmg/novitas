@@ -1,18 +1,15 @@
 """Core data models for the Novitas AI system."""
 
+from datetime import UTC
 from datetime import datetime
 from enum import Enum
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
 from uuid import UUID
 from uuid import uuid4
 
 from pydantic import BaseModel
 from pydantic import Field
-from pydantic import validator
+from pydantic import field_validator
 
 
 class AgentType(str, Enum):
@@ -52,11 +49,12 @@ class ChangeProposal(BaseModel):
     file_path: str
     description: str
     reasoning: str
-    proposed_changes: Dict[str, Any]
+    proposed_changes: dict[str, Any]
     confidence_score: float = Field(ge=0.0, le=1.0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-    @validator("confidence_score")
+    @field_validator("confidence_score")
+    @classmethod
     def validate_confidence(cls, v: float) -> float:
         if not 0.0 <= v <= 1.0:
             raise ValueError("confidence_score must be between 0.0 and 1.0")
@@ -73,15 +71,15 @@ class AgentState(BaseModel):
     status: AgentStatus = AgentStatus.ACTIVE
     version: int = 1
     prompt: str
-    memory: Dict[str, Any] = Field(default_factory=dict)
-    performance_metrics: Dict[str, float] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_active: datetime = Field(default_factory=datetime.utcnow)
+    memory: dict[str, Any] = Field(default_factory=dict)
+    performance_metrics: dict[str, float] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_active: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     def increment_version(self) -> None:
         """Increment the agent's version."""
         self.version += 1
-        self.last_active = datetime.utcnow()
+        self.last_active = datetime.now(UTC)
 
 
 class ImprovementCycle(BaseModel):
@@ -89,19 +87,17 @@ class ImprovementCycle(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     cycle_number: int
-    start_time: datetime = Field(default_factory=datetime.utcnow)
-    end_time: Optional[datetime] = None
-    agents_used: List[UUID] = Field(default_factory=list)
-    changes_proposed: List[UUID] = Field(default_factory=list)
-    changes_accepted: List[UUID] = Field(default_factory=list)
+    start_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    end_time: datetime | None = None
+    agents_used: list[UUID] = Field(default_factory=list)
+    changes_proposed: list[UUID] = Field(default_factory=list)
+    changes_accepted: list[UUID] = Field(default_factory=list)
     success: bool = True
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
-    def complete(
-        self, success: bool = True, error_message: Optional[str] = None
-    ) -> None:
+    def complete(self, success: bool = True, error_message: str | None = None) -> None:
         """Mark the cycle as complete."""
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         self.success = success
         self.error_message = error_message
 
@@ -116,7 +112,7 @@ class SystemMetrics(BaseModel):
     total_changes_proposed: int = 0
     total_changes_accepted: int = 0
     average_cycle_duration: float = 0.0
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class AgentAction(BaseModel):
@@ -125,11 +121,11 @@ class AgentAction(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     agent_id: UUID
     action_type: str
-    details: Dict[str, Any]
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    details: dict[str, Any]
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     success: bool = True
-    error_message: Optional[str] = None
-    duration_seconds: Optional[float] = None
+    error_message: str | None = None
+    duration_seconds: float | None = None
 
 
 class PromptTemplate(BaseModel):
@@ -141,11 +137,11 @@ class PromptTemplate(BaseModel):
     template: str
     version: int = 1
     is_active: bool = True
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     def update_template(self, new_template: str) -> None:
         """Update the template and increment version."""
         self.template = new_template
         self.version += 1
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
